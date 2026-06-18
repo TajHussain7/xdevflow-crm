@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
@@ -19,27 +19,9 @@ const registerSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[0-9]/, "Password must contain at least one number"),
-  role: z.enum(["admin", "manager", "user"]),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
-
-const roleDescriptions: Record<
-  string,
-  { label: string; description: string; icon: string }
-> = {
-  user: { label: "User", description: "View and create leads", icon: "person" },
-  manager: {
-    label: "Manager",
-    description: "Edit and manage leads",
-    icon: "manage_accounts",
-  },
-  admin: {
-    label: "Admin",
-    description: "Full platform access",
-    icon: "shield_person",
-  },
-};
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
@@ -101,15 +83,17 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { role: "user" },
   });
 
-  const watchPassword = watch("password", "");
-  const watchRole = watch("role", "user");
+  const watchPassword = useWatch({
+    control,
+    name: "password",
+    defaultValue: "",
+  });
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
@@ -281,44 +265,6 @@ export default function RegisterPage() {
                   </span>
                   {errors.password.message}
                 </p>
-              )}
-            </div>
-
-            {/* Workspace Role */}
-            <div className="space-y-1.5">
-              <label
-                className="block font-label-md text-label-md text-on-surface"
-                htmlFor="role"
-              >
-                Workspace Role
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-secondary group-focus-within:text-primary text-[18px] transition-colors">
-                    badge
-                  </span>
-                </div>
-                <select
-                  id="role"
-                  {...register("role")}
-                  className="sunken-input w-full pl-10 pr-10 py-2.5 border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-body-md text-body-md text-on-surface appearance-none cursor-pointer transition-all bg-surface-container-low/60"
-                >
-                  <option value="user">User (View and Create)</option>
-                  <option value="manager">Manager (Edit Leads)</option>
-                  <option value="admin">Admin (Full Control)</option>
-                </select>
-                <span className="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-secondary pointer-events-none text-[18px]">
-                  expand_more
-                </span>
-              </div>
-              {/* Role description hint */}
-              {watchRole && roleDescriptions[watchRole] && (
-                <div className="flex items-center gap-2 text-xs text-secondary bg-surface-container/50 rounded-lg px-3 py-2 border border-outline-variant/30">
-                  <span className="material-symbols-outlined text-[14px] text-primary">
-                    {roleDescriptions[watchRole].icon}
-                  </span>
-                  <span>{roleDescriptions[watchRole].description}</span>
-                </div>
               )}
             </div>
 

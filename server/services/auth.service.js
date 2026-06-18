@@ -1,14 +1,16 @@
 import jwt from 'jsonwebtoken';
-import { supabase } from '../config/supabase.js';
+import { supabaseAdmin, supabaseAuth } from '../config/supabase.js';
 
 /**
  * Register a new user via Supabase Auth and insert a profile row.
  * The trigger `on_auth_user_created` also creates the profile, but we insert
  * explicitly here so we can set the role and return it immediately.
  */
-export const registerUser = async ({ full_name, email, password, role = 'user' }) => {
+export const registerUser = async ({ full_name, email, password }) => {
+  const role = 'user';
+
   // Create Supabase Auth user
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+  const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
     email_confirm: true, // skip email confirmation for dev
@@ -23,7 +25,7 @@ export const registerUser = async ({ full_name, email, password, role = 'user' }
   }
 
   // Upsert profile (trigger may have already created it)
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .upsert({ id: authData.user.id, full_name, email, role }, { onConflict: 'id' })
     .select('id, full_name, email, role, created_at')
@@ -44,7 +46,7 @@ export const registerUser = async ({ full_name, email, password, role = 'user' }
  */
 export const loginUser = async ({ email, password }) => {
   // Authenticate via Supabase Auth
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+  const { data: authData, error: authError } = await supabaseAuth.auth.signInWithPassword({
     email,
     password,
   });
@@ -57,7 +59,7 @@ export const loginUser = async ({ email, password }) => {
   }
 
   // Fetch profile to get role
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('id, full_name, email, role')
     .eq('id', authData.user.id)
