@@ -1,11 +1,27 @@
 import { registerUser, loginUser } from '../services/auth.service.js';
 import { registerSchema, loginSchema } from '../validators/auth.validator.js';
 
-const COOKIE_OPTIONS = {
+const getCookieSecure = () => {
+  if (process.env.COOKIE_SECURE !== undefined) {
+    return process.env.COOKIE_SECURE === 'true';
+  }
+  return process.env.NODE_ENV === 'production';
+};
+
+const getCookieSameSite = () => {
+  const sameSite = (process.env.COOKIE_SAME_SITE || 'strict').toLowerCase();
+  return ['strict', 'lax', 'none'].includes(sameSite) ? sameSite : 'strict';
+};
+
+const COOKIE_BASE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  secure: getCookieSecure(),
+  sameSite: getCookieSameSite(),
   path: '/',
+};
+
+const COOKIE_OPTIONS = {
+  ...COOKIE_BASE_OPTIONS,
   maxAge: 24 * 60 * 60 * 1000, // 24 hours
 };
 
@@ -27,12 +43,7 @@ export const login = async (req, res, next) => {
 };
 
 export const logout = (_req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/',
-  });
+  res.clearCookie('token', COOKIE_BASE_OPTIONS);
   res.json({ success: true, data: null });
 };
 
