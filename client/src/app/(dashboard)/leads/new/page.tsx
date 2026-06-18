@@ -19,9 +19,9 @@ export default function NewLeadPage() {
       onSuccess: () => {
         router.push("/leads");
       },
-      onError: (err: any) => {
+      onError: (err) => {
         setErrorMsg(
-          err.response?.data?.error?.message ||
+          (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message ||
             "Failed to create lead. Please verify the fields.",
         );
       },

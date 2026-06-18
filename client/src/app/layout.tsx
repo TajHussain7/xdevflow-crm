@@ -40,6 +40,7 @@ export default function RootLayout({
 
         {/* ── Inter + JetBrains Mono + Material Symbols Outlined ── */}
         {/* font-display=block prevents icons showing as text (FOIT over FOUT) */}
+        {/* eslint-disable-next-line @next/next/google-font-display, @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
           rel="stylesheet"

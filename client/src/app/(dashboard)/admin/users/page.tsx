@@ -43,7 +43,7 @@ export default function AdminUsersPage() {
       setIsLoading(true);
       const res = await api.get<{ data: Profile[] }>("/users");
       setUsers(res.data.data);
-    } catch (err: any) {
+    } catch {
       setErrorMsg("Failed to load user directory.");
     } finally {
       setIsLoading(false);
@@ -52,6 +52,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     if (isAdmin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchUsers();
     }
   }, [isAdmin]);
@@ -63,9 +64,9 @@ export default function AdminUsersPage() {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)),
       );
-    } catch (err: any) {
+    } catch (err) {
       alert(
-        err.response?.data?.error?.message || "Failed to update user role.",
+        (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message || "Failed to update user role.",
       );
     } finally {
       setUpdatingId(null);

@@ -28,9 +28,9 @@ export default function EditLeadPage({ params }: PageProps) {
         onSuccess: () => {
           router.push(`/leads/${id}`);
         },
-        onError: (err: any) => {
+        onError: (err) => {
           setErrorMsg(
-            err.response?.data?.error?.message ||
+            (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message ||
               "Failed to update lead. Please check the fields.",
           );
         },
