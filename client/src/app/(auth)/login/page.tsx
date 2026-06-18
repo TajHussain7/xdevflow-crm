@@ -43,9 +43,9 @@ export default function LoginPage() {
       );
       setUser(response.data.data.profile);
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err) {
       setErrorMsg(
-        err.response?.data?.error?.message ||
+        (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message ||
           "Authentication failed. Please verify your credentials.",
       );
     } finally {

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
-import type { Profile, LeadStatus, CreateLeadInput } from "@/types";
+import type { Profile, CreateLeadInput } from "@/types";
 
 const leadFormSchema = z.object({
   full_name: z
