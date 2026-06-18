@@ -120,9 +120,9 @@ export default function RegisterPage() {
       await api.post("/auth/register", data);
       setSuccessMsg("Registration successful! Redirecting to login...");
       setTimeout(() => router.push("/login"), 2000);
-    } catch (err: any) {
+    } catch (err) {
       setErrorMsg(
-        err.response?.data?.error?.message ||
+        (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message ||
           "Registration failed. This email may already be in use.",
       );
     } finally {
