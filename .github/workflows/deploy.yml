@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - develop
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,15 +32,30 @@ jobs:
       - name: Determine Dynamic Tag / Environment
         id: vars
         run: |
+          IMAGE=$(echo "ghcr.io/${{ github.repository }}/server" | tr '[:upper:]' '[:lower:]')
+
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "env=production" >> $GITHUB_OUTPUT
             echo "tag=prod" >> $GITHUB_OUTPUT
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE}:latest"
+              echo "${IMAGE}:prod"
+              echo "${IMAGE}:$(git rev-parse --short HEAD)"
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
           else
             echo "env=staging" >> $GITHUB_OUTPUT
             echo "tag=dev" >> $GITHUB_OUTPUT
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE}:dev"
+              echo "${IMAGE}:$(git rev-parse --short HEAD)"
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
           fi
           echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "repository=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_OUTPUT
+          echo "image=${IMAGE}" >> $GITHUB_OUTPUT
 
       - name: Build and Push Server Image
         uses: docker/build-push-action@v5
@@ -46,10 +63,7 @@ jobs:
           context: ./server
           file: ./server/Dockerfile
           push: true
-          tags: |
-            ghcr.io/${{ steps.vars.outputs.repository }}/server:latest
-            ghcr.io/${{ steps.vars.outputs.repository }}/server:${{ steps.vars.outputs.tag }}
-            ghcr.io/${{ steps.vars.outputs.repository }}/server:${{ steps.vars.outputs.sha }}
+          tags: ${{ steps.vars.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
