@@ -9,8 +9,10 @@ const getCookieSecure = () => {
 };
 
 const getCookieSameSite = () => {
-  const sameSite = (process.env.COOKIE_SAME_SITE || "none").toLowerCase();
-  return ["strict", "lax", "none"].includes(sameSite) ? sameSite : "none";
+  if (process.env.NODE_ENV === "production") {
+    return "none";
+  }
+  return "lax";
 };
 
 const COOKIE_BASE_OPTIONS = {
