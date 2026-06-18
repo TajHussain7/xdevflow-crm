@@ -10,7 +10,9 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isLoginRequest = error.config?.url?.includes('/auth/login');
+
+    if (error.response?.status === 401 && !isLoginRequest) {
       // Only redirect if we're in the browser
       if (typeof window !== 'undefined') {
         window.location.href = '/login';

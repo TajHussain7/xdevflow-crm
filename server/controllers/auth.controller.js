@@ -5,6 +5,7 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict',
+  path: '/',
   maxAge: 24 * 60 * 60 * 1000, // 24 hours
 };
 
@@ -26,7 +27,12 @@ export const login = async (req, res, next) => {
 };
 
 export const logout = (_req, res) => {
-  res.clearCookie('token', { httpOnly: true, sameSite: 'strict' });
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+  });
   res.json({ success: true, data: null });
 };
 
