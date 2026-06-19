@@ -2,20 +2,21 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
-  const pathname = request.nextUrl.pathname;
+  // Note: Token is set on backend domain (xdevflow-crm.onrender.com)
+  // Frontend is on different domain (xdevflow-crm-nine.vercel.app)
+  // Cookies are domain-scoped, so we rely on localStorage & API auth checks instead
 
+  const pathname = request.nextUrl.pathname;
   const isAuthPage =
     pathname.startsWith("/login") || pathname.startsWith("/register");
 
-  if (!token && !isAuthPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // Allow auth pages freely
+  if (isAuthPage) {
+    return NextResponse.next();
   }
 
-  if (token && isAuthPage) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
+  // For protected routes, let client-side handle auth verification
+  // API interceptor will redirect to /login on 401
   return NextResponse.next();
 }
 
