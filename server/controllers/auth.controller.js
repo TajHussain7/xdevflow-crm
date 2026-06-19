@@ -42,7 +42,9 @@ export const login = async (req, res, next) => {
     const data = loginSchema.parse(req.body);
     const { token, profile } = await loginUser(data);
     res.cookie("token", token, COOKIE_OPTIONS);
-    res.json({ success: true, data: { profile } });
+    // Return token in response body for cross-origin frontend (Vercel)
+    // to use in Authorization header since cookies don't work cross-domain
+    res.json({ success: true, data: { token, profile } });
   } catch (err) {
     next(err);
   }
