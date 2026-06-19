@@ -3,6 +3,7 @@
 import React from "react";
 import { useLead, useDeleteLead } from "@/hooks/useLeads";
 import LeadStatusBadge from "@/components/leads/LeadStatusBadge";
+import LeadStatusTransition from "@/components/leads/LeadStatusTransition";
 import ActivityTimeline from "@/components/leads/ActivityTimeline";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useRouter } from "next/navigation";
@@ -280,6 +281,10 @@ export default function LeadDetailPage({ params }: PageProps) {
 
           {/* Timeline */}
           <div className="space-y-4">
+            {/* Status Transition Card */}
+            {lead && <LeadStatusTransition lead={lead} />}
+
+            {/* Activity Timeline */}
             <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden">
               <div className="px-5 py-4 border-b border-outline-variant/30 bg-surface-container-low/40 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-[18px]">
