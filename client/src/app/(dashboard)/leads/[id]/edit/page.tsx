@@ -1,8 +1,9 @@
 "use client";
 
-import React from 'react';
+import React from "react";
 import { useLead, useUpdateLead } from "@/hooks/useLeads";
 import LeadForm from "@/components/leads/LeadForm";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ShieldAlert } from "lucide-react";
@@ -16,9 +17,39 @@ interface PageProps {
 export default function EditLeadPage({ params }: PageProps) {
   const { id } = React.use(params);
   const router = useRouter();
+  const { canEdit } = usePermissions();
   const { data: lead, isLoading } = useLead(id);
   const updateMutation = useUpdateLead();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Check if user has permission to edit leads
+  if (!isLoading && !canEdit) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="w-20 h-20 rounded-2xl bg-error-container/30 flex items-center justify-center mb-5 border border-error/20 mx-auto">
+            <ShieldAlert size={36} className="text-error" />
+          </div>
+          <h3 className="text-headline-lg text-on-surface font-extrabold mb-2">
+            Access Denied
+          </h3>
+          <p className="text-secondary text-sm mb-5 max-w-sm">
+            You do not have permission to edit leads. Only managers and
+            administrators can modify lead details.
+          </p>
+          <Link
+            href={`/leads/${id}`}
+            className="text-primary font-semibold hover:underline flex items-center gap-1 justify-center"
+          >
+            <span className="material-symbols-outlined text-[16px]">
+              arrow_back
+            </span>
+            Return to lead profile
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const onSubmit = (data: CreateLeadInput) => {
     setErrorMsg(null);
@@ -30,7 +61,8 @@ export default function EditLeadPage({ params }: PageProps) {
         },
         onError: (err) => {
           setErrorMsg(
-            (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message ||
+            (err as { response?: { data?: { error?: { message?: string } } } })
+              .response?.data?.error?.message ||
               "Failed to update lead. Please check the fields.",
           );
         },
@@ -169,6 +201,7 @@ export default function EditLeadPage({ params }: PageProps) {
               }}
               onSubmit={onSubmit}
               isLoading={updateMutation.isPending}
+              isEditMode={true}
             />
           </div>
         </div>
