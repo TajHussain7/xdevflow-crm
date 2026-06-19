@@ -35,15 +35,19 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     try {
-      const response = await api.post<ApiResponse<{ profile: Profile }>>(
-        "/auth/login",
-        data,
-      );
+      const response = await api.post<
+        ApiResponse<{ token: string; profile: Profile }>
+      >("/auth/login", data);
+      // Store token in localStorage for subsequent requests
+      if (response.data.data.token) {
+        localStorage.setItem("xdevflow-token", response.data.data.token);
+      }
       setUser(response.data.data.profile);
       window.location.replace("/dashboard");
     } catch (err) {
       setErrorMsg(
-        (err as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message ||
+        (err as { response?: { data?: { error?: { message?: string } } } })
+          .response?.data?.error?.message ||
           "Authentication failed. Please verify your credentials.",
       );
     } finally {
