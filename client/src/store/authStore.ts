@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Profile } from '@/types';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { Profile } from "@/types";
 
 interface AuthState {
   user: Profile | null;
@@ -15,8 +15,14 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       setUser: (user) => set({ user }),
-      logout: () => set({ user: null }),
+      logout: () => {
+        // Clear token from localStorage on logout
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("xdevflow-token");
+        }
+        set({ user: null });
+      },
     }),
-    { name: 'xdevflow-auth' }
-  )
+    { name: "xdevflow-auth" },
+  ),
 );

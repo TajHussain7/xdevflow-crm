@@ -1,25 +1,44 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "/api/v1",
   withCredentials: true, // send HttpOnly cookie on every request
-  headers: { 'Content-Type': 'application/json' },
+  headers: { "Content-Type": "application/json" },
 });
+
+// ── Request interceptor: Add token to Authorization header ────────
+api.interceptors.request.use(
+  (config) => {
+    // Read token from localStorage (set on login)
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("xdevflow-token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
 // ── Response interceptor ──────────────────────
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isLoginRequest = error.config?.url?.includes('/auth/login');
+    const isLoginRequest = error.config?.url?.includes("/auth/login");
 
     if (error.response?.status === 401 && !isLoginRequest) {
+      // Clear token on auth failure
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("xdevflow-token");
+      }
       // Only redirect if we're in the browser
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;
